@@ -85,7 +85,6 @@ Vue.component('live-preview', {
         ctx.fillRect(68, 22, 222, 168);
         ctx.fillStyle = this.menuHeaderBG;
         ctx.fillRect(68, 22, 222, 12);
-        console.log(this.menuHeaderText)
         ctx.fillStyle = this.menuHeaderText;
         ctx.fillText("Main Menu", 136, 32);
 
@@ -176,7 +175,7 @@ const app = new Vue({
     freeSlot: '',
   },
   created() {
-    // this.loadFromStorage();
+    this.loadFromStorage();
     this.buildPatch();
   },
   watch: {
@@ -200,7 +199,6 @@ const app = new Vue({
           palette.palAddrs = palette.palAddrs.slice(0, 1);
         }
       });
-      console.log(palettes);
       return palettes;
     },
     downloadEnabled: function() {
