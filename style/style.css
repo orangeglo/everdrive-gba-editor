@@ -2,11 +2,16 @@ html {
   font-family: sans-serif;
 }
 
-.heading { margin-bottom: 2rem; }
+.heading {
+  margin-bottom: 2rem;
+  margin-left: 1rem;
+}
+
 .heading h1 {
   margin-bottom: 0.5rem;
   font-style: italic;
 }
+
 .heading p {
   margin-top: 0;
   margin-left: 0.2rem;
@@ -62,18 +67,19 @@ input[type="color"]::-webkit-color-swatch-wrapper {
 
 .row {
   display: flex;
-  flex-flow: wrap;
 }
 
 .row > * {
-  margin: 2rem;
+  margin: 1rem;
 }
 
 .live-preview {
-  width: 360px;
-  height: 240px;
-  color: white;
-  background-color: black;
+  margin-left: 3rem;
+}
+
+.live-preview canvas {
+  display: block;
+  margin-bottom: 1rem;
 }
 
 .theme-controls > h3:first-child {
