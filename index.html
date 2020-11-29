@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>EverDrive GBA Theme Editor</title>
+    <script src="script/vue.min.js"></script>
+    <script id="devload" src="script/devload.js"></script>
+    <link rel="stylesheet" type="text/css" href="style/style.css" />
+  </head>
+
+  <body>
+    <noscript>
+      Looks like you have JS disabled. This tool needs javascript to function!
+    </noscript>
+
+    <div class='heading'>
+      <h1>EverDrive GBA Theme Editor</h1>
+      <p>Create a custom color theme for your EverDrive GBA X5 flashcart!</p>
+    </div>
+
+    <div id="app">
+      <div class='row'>
+        <div class='theme-controls'>
+          <h3> Standard Palette Entries </h3>
+          <div class='palettes'>
+            <palette-entry
+              v-for="palette in palettes"
+              :palette="palette"
+              @color-changed="colorChanged($event.value, $event.id)"
+              :disabled="disabledPalettes.includes(palette.id)"
+            ></palette-entry>
+          </div>
+          <div
+            class='free-slot-controls'
+            :class="{disabled: freeSlotDisabled}"
+          >
+            <span>⤷</span>
+            <select v-model="freeSlot">
+              <option value=''>... and leave the free slot empty</option>
+              <option value='6'>... and also make 6. Background this color</option>
+              <option value='7'>... and also make 7. Menu Header Text this color</option>
+            </select>
+          </div>
+
+          <h3> Override Palette Entries </h3>
+          <p class='short-text'>To edit these colors, you need to override a standard palette entry. The overriden entry will become black.</p>
+          <palette-entry
+            v-for="extra in extras"
+            :palette="extra"
+            extra='true'
+            @color-changed="colorChanged($event.value, $event.id)"
+            @override-changed="overrideChanged($event.value, $event.id)"
+            :free-slot-color="freeSlotColor"
+            :disabled="disabledPalettes.includes(extra.id)"
+          ></palette-entry>
+
+          <h3> Download & Patch </h3>
+          <a
+            :href='patchData'
+            class='download-link'
+            type="application/octet-stream"
+            download="everdrive_gba_v15_theme_patch.ips"
+            :class="{ disabled: !downloadEnabled }"
+          >
+            Download IPS Patch
+          </a>
+          <p class='short-text'>
+            Apply the patch to the <code>GBAOS.gba</code> file on your EverDrive. <span class='bold'>This patch will only work with the latest firmware version, v1.15!</span> You can download the latest firmware from <a href="http://krikzz.com/pub/support/everdrive-gba/OS/">Krikzz's website</a>. I recommend using <a href="https://www.romhacking.net/patch/">ROMhacking.net's online patching tool</a> if you don't have a preferred patching method.
+          </p>
+        </div>
+        <div class='live-preview'>
+          Live preview will go here!
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <a href="https://github.com/orangeglo/bgr555">view this project on github</a>
+      -
+      by orangeglo (orangeglo#6197 on Discord)
+    </footer>
+
+    <script src="script/app.js"></script>
+  </body>
+</html>
