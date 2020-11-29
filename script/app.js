@@ -12,160 +12,6 @@ const DEFAULT_EXTRAS = [
 const IPS_HEADER = [0x50, 0x41, 0x54, 0x43, 0x48];
 const IPS_EOF = [0x45, 0x4F, 0x46];
 
-Vue.component('live-preview', {
-  props: ['palettes', 'show-menu'],
-  computed: {
-    basicText: function() { return this.getStandardColor(1); },
-    unselectedROM: function() { return this.getStandardColor(2); },
-    folderMenuItem: function() { return this.getStandardColor(3); },
-    menuHeaderBG: function() { return this.getStandardColor(4); },
-    headerFooterMenuBG: function() { return this.getStandardColor(5); },
-    backgroundColor: function() { return this.getOverrideColor(0); },
-    menuHeaderText: function() { return this.getOverrideColor(0x7E); },
-  },
-  watch: {
-    palettes: function() {
-      this.renderCanvas();
-    }
-  },
-  mounted: function() {
-    this.renderCanvas();
-  },
-  methods: {
-    getStandardColor: function(id) {
-      const palette = this.palettes.find(p => p.id === id);
-      return palette.overrideHex ? '#000000' : palette.hex;
-    },
-    getOverrideColor: function(pal) {
-      const palette = this.palettes.find(p => p.pal === pal) || {};
-      return palette.overrideHex || palette.hex || '#000000';
-    },
-    renderCanvas: function() {
-      const canvas = this.$refs.canvas;
-      const ctx = canvas.getContext('2d');
-      ctx.font = "bold 14px monospace";
-
-      ctx.fillStyle = this.backgroundColor;
-      ctx.fillRect(0, 0, 360, 240);
-      ctx.fillStyle = this.headerFooterMenuBG;
-      ctx.fillRect(0, 0, 360, 12);
-      ctx.fillRect(0, 240-24, 360, 24);
-
-      ctx.fillStyle = this.basicText;
-      ctx.fillText("Basic Text", 1, 10);
-
-      if (this.showMenu) {
-        ctx.fillStyle = this.folderMenuItem;
-        ctx.fillText("Selected Folder", 1, 240-14);
-      } else {
-        ctx.fillText("Selected ROM", 1, 240-14);
-      }
-
-      for (let i = 0; i < 15; i++) {
-        const y = i * 12 + 32;
-        if (i === 0) {
-          if (this.showMenu) {
-            ctx.fillStyle = this.basicText;
-            ctx.fillText("Selected Folder", 1, y);
-          } else {
-            ctx.fillStyle = this.folderMenuItem;
-            ctx.fillText("Unselected Folder", 1, y);
-          }
-        } else if (i === 6 && !this.showMenu) {
-          ctx.fillStyle = this.basicText;
-          ctx.fillText("Selected ROM", 1, y);
-        } else {
-          ctx.fillStyle = this.unselectedROM;
-          ctx.fillText("Unselected ROM", 1, y);
-        }
-      }
-
-      if (this.showMenu) {
-        ctx.fillStyle = this.headerFooterMenuBG;
-        ctx.fillRect(68, 22, 222, 168);
-        ctx.fillStyle = this.menuHeaderBG;
-        ctx.fillRect(68, 22, 222, 12);
-        console.log(this.menuHeaderText)
-        ctx.fillStyle = this.menuHeaderText;
-        ctx.fillText("Main Menu", 136, 32);
-
-        ctx.fillStyle = this.basicText;
-        ctx.fillText("Options", 144, 32+12*2);
-        ctx.fillStyle = this.folderMenuItem;
-        ctx.fillText("Recently Played", 111, 32+12*4);
-        ctx.fillText("Start Random Game", 103, 32+12*6);
-        ctx.fillText("Device Info", 128, 32+12*8);
-        ctx.fillText("Diagnostics", 128, 32+12*10);
-        ctx.fillText("About", 154, 32+12*12);
-      }
-    },
-  },
-  template: `
-    <canvas width='360' height='240' ref='canvas'></canvas>
-  `
-});
-
-Vue.component('palette-entry', {
-  props: ['palette', 'extra', 'free-slot-color', 'disabled'],
-  template: `
-    <div class='palette'>
-      <label :for="'palette-' + palette.id" :class="{disabled: disabled}">
-        {{ palette.id }}. {{ palette.label }}
-      </label>
-      <div class='controls'>
-        <select
-          v-if='extra'
-          @change="e => {
-            $emit('override-changed', { value: e.target.value, id: palette.id });
-          }"
-          :class="{disabled: disabled}"
-          :value='palette.overrideId'
-        >
-          <option value=''>Inactive</option>
-          <option value='1'>Override #1</option>
-          <option value='2'>Override #2</option>
-          <option value='3'>Override #3</option>
-          <option value='4'>Override #4</option>
-          <option value='5'>Override #5</option>
-        </select>
-        <input
-          type='text'
-          :value="palette.hex"
-          @input="e => {
-            $emit('color-changed', { value: e.target.value, id: palette.id });
-          }"
-          maxlength='7'
-          pattern="#[0-9A-Fa-f]{6}"
-          class='color-input'
-          :class="{disabled: disabled}"
-        />
-        <input
-          v-if="!disabled"
-          :id="'palette-' + palette.id"
-          type='color'
-          :value="palette.hex"
-          @input="e => {
-            $emit('color-changed', { value: e.target.value, id: palette.id });
-          }" 
-          :class="{disabled: disabled}"
-        />
-        <input
-          v-if="disabled && !extra"
-          type='color'
-          value='#000000'
-          :disabled='true'
-        />
-        <input
-          v-if="disabled && extra"
-          type='color'
-          :value="freeSlotColor"
-          :disabled='true'
-        />
-      </div>
-    </div>
-  `
-});
-
 const app = new Vue({
   el: '#app',
   data: {
@@ -176,7 +22,7 @@ const app = new Vue({
     freeSlot: '',
   },
   created() {
-    // this.loadFromStorage();
+    this.loadFromStorage();
     this.buildPatch();
   },
   watch: {
@@ -200,7 +46,6 @@ const app = new Vue({
           palette.palAddrs = palette.palAddrs.slice(0, 1);
         }
       });
-      console.log(palettes);
       return palettes;
     },
     downloadEnabled: function() {
@@ -296,4 +141,157 @@ const app = new Vue({
       if (freeSlotJson) { this.freeSlot = JSON.parse(freeSlotJson); }
     },
   }
+});
+
+Vue.component('palette-entry', {
+  props: ['palette', 'extra', 'free-slot-color', 'disabled'],
+  template: `
+    <div class='palette'>
+      <label :for="'palette-' + palette.id" :class="{disabled: disabled}">
+        {{ palette.id }}. {{ palette.label }}
+      </label>
+      <div class='controls'>
+        <select
+          v-if='extra'
+          @change="e => {
+            $emit('override-changed', { value: e.target.value, id: palette.id });
+          }"
+          :class="{disabled: disabled}"
+          :value='palette.overrideId'
+        >
+          <option value=''>Inactive</option>
+          <option value='1'>Override #1</option>
+          <option value='2'>Override #2</option>
+          <option value='3'>Override #3</option>
+          <option value='4'>Override #4</option>
+          <option value='5'>Override #5</option>
+        </select>
+        <input
+          type='text'
+          :value="palette.hex"
+          @input="e => {
+            $emit('color-changed', { value: e.target.value, id: palette.id });
+          }"
+          maxlength='7'
+          pattern="#[0-9A-Fa-f]{6}"
+          class='color-input'
+          :class="{disabled: disabled}"
+        />
+        <input
+          v-if="!disabled"
+          :id="'palette-' + palette.id"
+          type='color'
+          :value="palette.hex"
+          @input="e => {
+            $emit('color-changed', { value: e.target.value, id: palette.id });
+          }" 
+          :class="{disabled: disabled}"
+        />
+        <input
+          v-if="disabled && !extra"
+          type='color'
+          value='#000000'
+          :disabled='true'
+        />
+        <input
+          v-if="disabled && extra"
+          type='color'
+          :value="freeSlotColor"
+          :disabled='true'
+        />
+      </div>
+    </div>
+  `
+});
+
+Vue.component('live-preview', {
+  props: ['palettes', 'show-menu'],
+  computed: {
+    basicText: function() { return this.getStandardColor(1); },
+    unselectedROM: function() { return this.getStandardColor(2); },
+    folderMenuItem: function() { return this.getStandardColor(3); },
+    menuHeaderBG: function() { return this.getStandardColor(4); },
+    headerFooterMenuBG: function() { return this.getStandardColor(5); },
+    backgroundColor: function() { return this.getOverrideColor(0); },
+    menuHeaderText: function() { return this.getOverrideColor(0x7E); },
+  },
+  watch: {
+    palettes: function() {
+      this.renderCanvas();
+    }
+  },
+  mounted: function() {
+    this.renderCanvas();
+  },
+  methods: {
+    getStandardColor: function(id) {
+      const palette = this.palettes.find(p => p.id === id);
+      return palette.overrideHex ? '#000000' : palette.hex;
+    },
+    getOverrideColor: function(pal) {
+      const palette = this.palettes.find(p => p.pal === pal) || {};
+      return palette.overrideHex || palette.hex || '#000000';
+    },
+    renderCanvas: function() {
+      const canvas = this.$refs.canvas;
+      const ctx = canvas.getContext('2d');
+      ctx.font = "bold 14px monospace";
+
+      ctx.fillStyle = this.backgroundColor;
+      ctx.fillRect(0, 0, 360, 240);
+      ctx.fillStyle = this.headerFooterMenuBG;
+      ctx.fillRect(0, 0, 360, 12);
+      ctx.fillRect(0, 240-24, 360, 24);
+
+      ctx.fillStyle = this.basicText;
+      ctx.fillText("Basic Text", 1, 10);
+
+      if (this.showMenu) {
+        ctx.fillStyle = this.folderMenuItem;
+        ctx.fillText("Selected Folder", 1, 240-14);
+      } else {
+        ctx.fillText("Selected ROM", 1, 240-14);
+      }
+
+      for (let i = 0; i < 15; i++) {
+        const y = i * 12 + 32;
+        if (i === 0) {
+          if (this.showMenu) {
+            ctx.fillStyle = this.basicText;
+            ctx.fillText("Selected Folder", 1, y);
+          } else {
+            ctx.fillStyle = this.folderMenuItem;
+            ctx.fillText("Unselected Folder", 1, y);
+          }
+        } else if (i === 6 && !this.showMenu) {
+          ctx.fillStyle = this.basicText;
+          ctx.fillText("Selected ROM", 1, y);
+        } else {
+          ctx.fillStyle = this.unselectedROM;
+          ctx.fillText("Unselected ROM", 1, y);
+        }
+      }
+
+      if (this.showMenu) {
+        ctx.fillStyle = this.headerFooterMenuBG;
+        ctx.fillRect(68, 22, 222, 168);
+        ctx.fillStyle = this.menuHeaderBG;
+        ctx.fillRect(68, 22, 222, 12);
+        ctx.fillStyle = this.menuHeaderText;
+        ctx.fillText("Main Menu", 136, 32);
+
+        ctx.fillStyle = this.basicText;
+        ctx.fillText("Options", 144, 32+12*2);
+        ctx.fillStyle = this.folderMenuItem;
+        ctx.fillText("Recently Played", 111, 32+12*4);
+        ctx.fillText("Start Random Game", 103, 32+12*6);
+        ctx.fillText("Device Info", 128, 32+12*8);
+        ctx.fillText("Diagnostics", 128, 32+12*10);
+        ctx.fillText("About", 154, 32+12*12);
+      }
+    },
+  },
+  template: `
+    <canvas width='360' height='240' ref='canvas'></canvas>
+  `
 });
