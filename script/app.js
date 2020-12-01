@@ -1,3 +1,10 @@
+/*
+  - Shareable urls
+  - Preview image with shareable url is the theme preview
+  - gallery?
+  - more control over saving? need to prevent shared theme from overriding
+*/
+
 const DEFAULT_PALETTES = [
   { id: 1, label: 'Basic Text, Selected Entry', value: 0xFF7F, hex: '#FFFFFF', valAddr: 0x6A64, palAddrs: [0x6A50] },
   { id: 2, label: 'Unselected ROM', value: 0xF75E, hex: '#BDBDBD', valAddr: 0x6A50, palAddrs: [0x6A54] },
@@ -11,6 +18,10 @@ const DEFAULT_EXTRAS = [
 ];
 const IPS_HEADER = [0x50, 0x41, 0x54, 0x43, 0x48];
 const IPS_EOF = [0x45, 0x4F, 0x46];
+
+const deepClone = (arr) => {
+  return arr.map(obj => Object.assign({}, obj));
+}
 
 Vue.component('live-preview', {
   props: ['palettes', 'show-menu'],
@@ -168,8 +179,8 @@ Vue.component('palette-entry', {
 const app = new Vue({
   el: '#app',
   data: {
-    palettes: DEFAULT_PALETTES.slice(),
-    extras: DEFAULT_EXTRAS.slice(),
+    palettes: deepClone(DEFAULT_PALETTES),
+    extras: deepClone(DEFAULT_EXTRAS),
     patchData: null,
     buildPatchTimeoutHandle: null,
     freeSlot: '',
@@ -186,7 +197,7 @@ const app = new Vue({
   },
   computed: {
     combinedPalettes: function() {
-      const palettes = this.palettes.map(p => Object.assign({}, p));
+      const palettes = deepClone(this.palettes);
       this.extras.forEach(extra => {
         if (extra.overrideId) {
           const palette = palettes.find(p => p.id === extra.overrideId);
@@ -292,6 +303,15 @@ const app = new Vue({
       if (palettesJson) { this.palettes = JSON.parse(palettesJson); }
       if (extrasJson) { this.extras = JSON.parse(extrasJson); }
       if (freeSlotJson) { this.freeSlot = JSON.parse(freeSlotJson); }
+    },
+    reset: function() {
+      const sure = window.confirm('Are you sure you want to reset to the default colors?');
+      if (sure) {
+        this.palettes = deepClone(DEFAULT_PALETTES);
+        this.extras = deepClone(DEFAULT_EXTRAS);
+        this.freeSlot = '';
+        this.buildPatch();
+      }
     },
   }
 });

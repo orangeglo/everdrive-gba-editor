@@ -21,7 +21,7 @@
     <div id="app">
       <div class='row'>
         <div class='theme-controls'>
-          <h3> Standard Palette Entries </h3>
+          <h3> Edit Palette Entries </h3>
           <div class='palettes'>
             <palette-entry
               v-for="palette in palettes"
@@ -42,8 +42,7 @@
             </select>
           </div>
 
-          <h3> Override Palette Entries </h3>
-          <p class='short-text'>To edit these colors, you need to override a standard palette entry. The overriden entry will become black.</p>
+          <p class='short-text'>To edit these next colors, you need to override a palette entry from above. The overriden entry will become black.</p>
           <palette-entry
             v-for="extra in extras"
             :palette="extra"
@@ -53,6 +52,10 @@
             :free-slot-color="freeSlotColor"
             :disabled="disabledPalettes.includes(extra.id)"
           ></palette-entry>
+
+          <div class='form-controls'>
+            <button @click="reset">Reset to Default</button>
+          </div>
 
           <h3> Download & Patch </h3>
           <a

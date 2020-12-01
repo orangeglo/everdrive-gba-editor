@@ -17,11 +17,20 @@ html {
   margin-left: 0.2rem;
 }
 
-button {
+/*button {
   height: 25px;
   font-weight: bold;
   margin-right: 0.5rem;
-}
+}*/
+
+/*button {
+  background: none !important;
+  border: none;
+  padding: 0 !important;
+  color: blue;
+  cursor: pointer;
+  text-decoration: underline;
+}*/
 
 .color-input {
   height: 16px;
@@ -86,6 +95,11 @@ input[type="color"]::-webkit-color-swatch-wrapper {
   margin-top: 0;
 }
 
+.form-controls {
+  margin-top: 1rem;
+  margin-bottom: 2rem;
+}
+
 .palette {
   display: flex;
   justify-content: space-between;
@@ -141,14 +155,22 @@ input:focus {
 }
 
 .short-text {
-  max-width: 400px;
+  max-width: 450px;
+  font-size: 0.87rem;
 }
 
 h3 {
-  padding-top: 4px;
+  padding-top: 2px;
   color: #444;
   border-top: 1px solid grey;
   border-bottom: 1px solid grey;
+  font-size: 1.25em;
+}
+
+code {
+  background-color: #e8e8e8;
+  padding: 2px;
+  border-radius: 3px;
 }
 
 .free-slot-controls {
