@@ -24,7 +24,7 @@ const deepClone = (arr) => {
 }
 
 Vue.component('live-preview', {
-  props: ['palettes', 'show-menu'],
+  props: ['palettes', 'show-menu', 'fonts-loaded'],
   computed: {
     basicText: function() { return this.getStandardColor(1); },
     unselectedROM: function() { return this.getStandardColor(2); },
@@ -35,9 +35,8 @@ Vue.component('live-preview', {
     menuHeaderText: function() { return this.getOverrideColor(0x7E); },
   },
   watch: {
-    palettes: function() {
-      this.renderCanvas();
-    }
+    palettes: function() { this.renderCanvas(); },
+    fontsLoaded: function() { this.renderCanvas(); }
   },
   mounted: function() {
     this.renderCanvas();
@@ -53,65 +52,70 @@ Vue.component('live-preview', {
     },
     renderCanvas: function() {
       const canvas = this.$refs.canvas;
+
       const ctx = canvas.getContext('2d');
-      ctx.font = "bold 14px monospace";
+      ctx.font = "21px ibm";
+
+      const write = (text, x, y) => {
+        if (this.fontsLoaded) { ctx.fillText(text, x*2, (y+0.5)*2); }
+      }
 
       ctx.fillStyle = this.backgroundColor;
-      ctx.fillRect(0, 0, 360, 240);
+      ctx.fillRect(0, 0, 720, 480);
       ctx.fillStyle = this.headerFooterMenuBG;
-      ctx.fillRect(0, 0, 360, 12);
-      ctx.fillRect(0, 240-24, 360, 24);
+      ctx.fillRect(0, 0, 720, 24);
+      ctx.fillRect(0, (240-24)*2, 720, 48);
 
       ctx.fillStyle = this.basicText;
-      ctx.fillText("Basic Text", 1, 10);
+      write("Basic Text", 2, 10);
 
       if (this.showMenu) {
         ctx.fillStyle = this.folderMenuItem;
-        ctx.fillText("Selected Folder", 1, 240-14);
+        write("Selected Folder", 2, 240-13);
       } else {
-        ctx.fillText("Selected ROM", 1, 240-14);
+        write("Selected ROM", 2, 240-14);
       }
 
       for (let i = 0; i < 15; i++) {
-        const y = i * 12 + 32;
+        const y = i * 12 + 33;
         if (i === 0) {
           if (this.showMenu) {
             ctx.fillStyle = this.basicText;
-            ctx.fillText("Selected Folder", 1, y);
+            write("Selected Folder", 2, y);
           } else {
             ctx.fillStyle = this.folderMenuItem;
-            ctx.fillText("Unselected Folder", 1, y);
+            write("Unselected Folder", 2, y);
           }
         } else if (i === 6 && !this.showMenu) {
           ctx.fillStyle = this.basicText;
-          ctx.fillText("Selected ROM", 1, y);
+          write("Selected ROM", 2, y);
         } else {
           ctx.fillStyle = this.unselectedROM;
-          ctx.fillText("Unselected ROM", 1, y);
+          write("Unselected ROM", 2, y);
         }
       }
 
       if (this.showMenu) {
         ctx.fillStyle = this.headerFooterMenuBG;
-        ctx.fillRect(68, 22, 222, 168);
+        ctx.fillRect(68*2, 23*2, 222*2, 168*2);
         ctx.fillStyle = this.menuHeaderBG;
-        ctx.fillRect(68, 22, 222, 12);
+        ctx.fillRect(68*2, 23*2, 222*2, 12*2);
         ctx.fillStyle = this.menuHeaderText;
-        ctx.fillText("Main Menu", 136, 32);
+        write("Main Menu", 126, 33);
 
         ctx.fillStyle = this.basicText;
-        ctx.fillText("Options", 144, 32+12*2);
+        write("Options", 138, 32+12*2);
         ctx.fillStyle = this.folderMenuItem;
-        ctx.fillText("Recently Played", 111, 32+12*4);
-        ctx.fillText("Start Random Game", 103, 32+12*6);
-        ctx.fillText("Device Info", 128, 32+12*8);
-        ctx.fillText("Diagnostics", 128, 32+12*10);
-        ctx.fillText("About", 154, 32+12*12);
+        write("Recently Played", 92, 32+12*4);
+        write("Start Random Game", 80, 32+12*6);
+        write("Device Info", 115, 32+12*8);
+        write("Diagnostics", 115, 32+12*10);
+        write("About", 151, 32+12*12);
       }
     },
   },
   template: `
-    <canvas width='360' height='240' ref='canvas'></canvas>
+    <canvas width='720' height='480' ref='canvas'></canvas>
   `
 });
 
@@ -184,6 +188,7 @@ const app = new Vue({
     patchData: null,
     buildPatchTimeoutHandle: null,
     freeSlot: '',
+    fontsLoaded: false,
   },
   created() {
     this.loadFromStorage();
@@ -315,3 +320,5 @@ const app = new Vue({
     },
   }
 });
+
+document.fonts.ready.then(function() { app.fontsLoaded = true;});

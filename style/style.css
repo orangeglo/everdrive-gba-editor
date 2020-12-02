@@ -1,3 +1,17 @@
+@font-face {
+  font-family: "ibm";
+  src: url("../font/WebPlus_IBM_VGA_9x8.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
+.font-loader {
+  font-family: 'ibm';
+  font-size: 1px;
+  opacity: 0;
+  position: absolute;
+}
+
 html {
   font-family: sans-serif;
 }
@@ -16,21 +30,6 @@ html {
   margin-top: 0;
   margin-left: 0.2rem;
 }
-
-/*button {
-  height: 25px;
-  font-weight: bold;
-  margin-right: 0.5rem;
-}*/
-
-/*button {
-  background: none !important;
-  border: none;
-  padding: 0 !important;
-  color: blue;
-  cursor: pointer;
-  text-decoration: underline;
-}*/
 
 .color-input {
   height: 16px;
@@ -89,6 +88,7 @@ input[type="color"]::-webkit-color-swatch-wrapper {
 .live-preview canvas {
   display: block;
   margin-bottom: 1rem;
+  width: 360px;
 }
 
 .theme-controls > h3:first-child {
