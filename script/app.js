@@ -1,8 +1,6 @@
 /*
-  - Shareable urls
   - Preview image with shareable url is the theme preview
   - gallery?
-  - more control over saving? need to prevent shared theme from overriding
 */
 
 const DEFAULT_PALETTES = [
@@ -352,4 +350,5 @@ const app = new Vue({
   }
 });
 
+document.querySelector('meta#dy').setAttribute('content', 'test');
 document.fonts.ready.then(function() { app.fontsLoaded = true;});
