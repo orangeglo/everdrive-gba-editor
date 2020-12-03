@@ -350,5 +350,4 @@ const app = new Vue({
   }
 });
 
-document.querySelector('meta#dy').setAttribute('content', 'test');
 document.fonts.ready.then(function() { app.fontsLoaded = true;});
