@@ -6,6 +6,7 @@
     <script src="script/vue.min.js"></script>
     <script id="devload" src="script/devload.js"></script>
     <link rel="stylesheet" type="text/css" href="style/style.css" />
+    <link rel="shortcut icon" type="image/x-icon" href="" class="favicon" />
   </head>
 
   <body>
@@ -56,6 +57,12 @@
 
           <div class='form-controls'>
             <button @click="reset">Reset to Default</button>
+            <div>
+              <button v-on:click="triggerIpsFileLabel" type="button">
+                <label for="ipsFileInput" ref="ipsFileLabel" v-on:click="e => e.stopPropagation()">Import an IPS Patch</label>
+              </button>
+              <input style="display: none" id="ipsFileInput" type="file" v-on:change="uploadIPS" accept=".ips">
+            </div>
           </div>
 
           <h3> Download & Patch </h3>

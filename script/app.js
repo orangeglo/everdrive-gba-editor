@@ -318,6 +318,54 @@ const app = new Vue({
         this.buildPatch();
       }
     },
+    triggerIpsFileLabel: function() { this.$refs.ipsFileLabel.click(); },
+    uploadIPS: function(e) {
+      const fileReader = new FileReader()
+      fileReader.onload = () => {
+        this.parseIPS(fileReader.result);
+      }
+      fileReader.readAsArrayBuffer(e.target.files[0]);
+      e.target.value = '';
+    },
+    parseIPS(ipsArrayBuffer) {
+      console.log(ipsArrayBuffer.slice(5, ipsArrayBuffer.byteLength - 3));
+      const buffer = new Uint8Array(ipsArrayBuffer).slice(5, ipsArrayBuffer.byteLength - 3);
+      const data = [];
+
+      const map = {};
+      map['6A64'] = val => this.palette.find(p => p.id === 1)
+      // convert each address into some state change
+      // need to bring in conversion from bgr to hex here
+
+      let state = 'offset';
+      let index = 0;
+      let temp = {};
+      while (index < buffer.length) {
+        if (state === 'offset') {
+          const o = buffer.slice(index, index + 3);
+          temp.offset = parseInt(`${o[0].toString(16)}${o[1].toString(16)}${o[2].toString(16)}`, 16);
+          temp.offsetHex = temp.offset.toString(16);
+          index += 4;
+          state = 'length';
+        } else if (state === 'length') {
+          temp.length = buffer[index];
+          index++;
+          state = 'value';
+        } else { // state === 'value'
+          const v = buffer.slice(index, index + temp.length);
+          let stringValue = '';
+          v.forEach(val => stringValue += val.toString(16));
+          temp.value = parseInt(stringValue, 16);
+          temp.valueHex = temp.value.toString(16);
+          index += temp.length;
+          data.push(temp);
+          temp = {};
+          state = 'offset';
+        }
+      }
+
+      console.log(data);
+    },
   }
 });
 
