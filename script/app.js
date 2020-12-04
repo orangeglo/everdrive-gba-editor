@@ -328,10 +328,14 @@ const app = new Vue({
       const decoded = atob(tag).split(',');
       const b36ToHex = (b36) => `#${parseInt(b36, 36).toString(16).padStart(6, '0')}`;
       if (decoded[0] === '1') {
-        for (let i = 0; i < 5; i++) { this.palettes[i].hex = b36ToHex(decoded[i + 1]); }
+        for (let i = 0; i < 5; i++) {
+          this.palettes[i].hex = b36ToHex(decoded[i + 1]);
+          this.palettes[i].value = this.hexToBGR(this.palettes[i].hex);
+        }
         this.freeSlot = decoded[6];
         for (let i = 0; i < 2; i++) {
           this.extras[i].hex = b36ToHex(decoded[i * 2 + 7]);
+          this.extras[i].value = this.hexToBGR(this.extras[i].hex);
           this.extras[i].overrideId = decoded[i * 2 + 8] !== '0' ? parseInt(decoded[i * 2 + 8]) : null;
         }
       }
