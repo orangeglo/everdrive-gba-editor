@@ -30,6 +30,14 @@ button {
   font-style: italic;
 }
 
+.outline {
+  color: white;
+  text-shadow: -2px -2px 0 #000,
+    2px -2px 0 #000,
+    -2px 2px 0 #000,
+    2px 2px 0 #000;
+}
+
 .heading p {
   margin-top: 0;
   margin-left: 0.2rem;
