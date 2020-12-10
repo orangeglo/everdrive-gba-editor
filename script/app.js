@@ -439,7 +439,7 @@ const app = new Vue({
       valToState['6A6C'] = val => {
         const override = data.some(d => ['6A74', '6A78'].includes(d.offset));
         if (!override) { // if 5 is overriden free slot can't be set
-          this.freeSlot = parseInt(val, 16) === 0x7E ? '7' : '6';
+          this.freeSlot = val === 0x7E ? '7' : '6';
         }
       };
 
@@ -448,7 +448,7 @@ const app = new Vue({
         const f = valToState[d.offset];
         if (f) { f(d.value); }
       });
-      this.triggerBuildPatch();
+      this.buildPatch();
     },
   }
 });
