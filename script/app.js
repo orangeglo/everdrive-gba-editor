@@ -188,7 +188,14 @@ const app = new Vue({
     fontsLoaded: false,
   },
   created() {
-    this.loadFromStorage();
+    const urlParams = new URLSearchParams(location.search);
+    if (urlParams.has('t')) {
+      for (const [key, value] of urlParams) {
+        if (key === 't') { this.loadFromUrlTag(value); }
+      }
+    } else {
+      this.loadFromStorage();
+    }
     this.buildPatch();
   },
   watch: {
@@ -265,6 +272,7 @@ const app = new Vue({
     },
     buildPatch: function() {
       this.saveToStorage();
+      this.updateUrlTag();
       this.buildPatchTimeoutHandle = null;
 
       const chunks = [];
@@ -318,8 +326,35 @@ const app = new Vue({
         this.buildPatch();
       }
     },
+    loadFromUrlTag: function(tag) {
+      const decoded = atob(tag).split(',');
+      const b36ToHex = (b36) => `#${parseInt(b36, 36).toString(16).padStart(6, '0')}`;
+      if (decoded[0] === '1') {
+        for (let i = 0; i < 5; i++) {
+          this.palettes[i].hex = b36ToHex(decoded[i + 1]);
+          this.palettes[i].value = this.hexToBGR(this.palettes[i].hex);
+        }
+        this.freeSlot = decoded[6];
+        for (let i = 0; i < 2; i++) {
+          this.extras[i].hex = b36ToHex(decoded[i * 2 + 7]);
+          this.extras[i].value = this.hexToBGR(this.extras[i].hex);
+          this.extras[i].overrideId = decoded[i * 2 + 8] !== '0' ? parseInt(decoded[i * 2 + 8]) : null;
+        }
+      }
+    },
+    updateUrlTag: function() {
+      const palettesBase36 = this.palettes.map(p => parseInt(p.hex.slice(1,7),16).toString(36));
+      const extrasBase36 = this.extras.map(e => [parseInt(e.hex.slice(1,7), 16).toString(36), e.overrideId || 0]);
+      const data = [1, ...palettesBase36, this.freeSlot, ...extrasBase36].flat();
+      const encodedData = btoa(data.join(','));
+      if (encodedData !== 'MSw5emxkciw3ZWl0OSw5ZDB6dSw2Z29ociw1aGY5bywsMCwwLDAsMA==') {
+        history.replaceState({t: encodedData}, '', `?t=${encodedData}`);
+      } else {
+        history.replaceState({}, '', location.href.split('?')[0]);
+      }
+    },
     triggerIpsFileLabel: function() { this.$refs.ipsFileLabel.click(); },
-    uploadIPS: function(e) {
+    uploadIPS: async function(e) {
       const fileReader = new FileReader()
       fileReader.onload = () => {
         this.parseIPS(fileReader.result);
@@ -327,7 +362,7 @@ const app = new Vue({
       fileReader.readAsArrayBuffer(e.target.files[0]);
       e.target.value = '';
     },
-    async parseIPS(ipsArrayBuffer) {
+    parseIPS: async function(ipsArrayBuffer) {
       const buffer = new Uint8Array(ipsArrayBuffer).slice(5, ipsArrayBuffer.byteLength - 3);
       const data = [];
 
@@ -413,7 +448,7 @@ const app = new Vue({
         const f = valToState[d.offset];
         if (f) { f(d.value); }
       });
-      this.saveToStorage();
+      this.triggerBuildPatch();
     },
   }
 });
