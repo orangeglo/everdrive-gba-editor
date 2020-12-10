@@ -1,6 +1,5 @@
 /*
-  - Preview image with shareable url is the theme preview
-  - gallery?
+  EverDrive GBA Theme Editor
 */
 
 const DEFAULT_PALETTES = [
@@ -315,8 +314,11 @@ const app = new Vue({
       if (extrasJson) { this.extras = JSON.parse(extrasJson); }
       if (freeSlotJson) { this.freeSlot = JSON.parse(freeSlotJson); }
     },
-    reset: function() {
-      const sure = window.confirm('Are you sure you want to reset to the default colors?');
+    reset: function(confirm = true) {
+      let sure = true;
+      if (confirm) {
+        sure = window.confirm('Are you sure you want to reset to the default colors?');
+      }
       if (sure) {
         this.palettes = deepClone(DEFAULT_PALETTES);
         this.extras = deepClone(DEFAULT_EXTRAS);
@@ -350,6 +352,103 @@ const app = new Vue({
       } else {
         history.replaceState({}, '', location.href.split('?')[0]);
       }
+    },
+    triggerIpsFileLabel: function() { this.$refs.ipsFileLabel.click(); },
+    uploadIPS: async function(e) {
+      const fileReader = new FileReader()
+      fileReader.onload = () => {
+        this.parseIPS(fileReader.result);
+      }
+      fileReader.readAsArrayBuffer(e.target.files[0]);
+      e.target.value = '';
+    },
+    parseIPS: async function(ipsArrayBuffer) {
+      const buffer = new Uint8Array(ipsArrayBuffer).slice(5, ipsArrayBuffer.byteLength - 3);
+      const data = [];
+
+      let state = 'offset';
+      let index = 0;
+      let temp = {};
+      while (index < buffer.length) {
+        if (state === 'offset') {
+          const o = buffer.slice(index, index + 3);
+          const offsetStr = parseInt(`${o[0].toString(16)}${o[1].toString(16)}${o[2].toString(16)}`, 16);
+          temp.offset = offsetStr.toString(16).toUpperCase();
+          index += 4;
+          state = 'length';
+        } else if (state === 'length') {
+          temp.length = buffer[index];
+          index++;
+          state = 'value';
+        } else { // state === 'value'
+          const v = buffer.slice(index, index + temp.length);
+          let stringValue = '';
+          v.forEach(val => stringValue += val.toString(16).padStart(2, '0'));
+          temp.value = parseInt(stringValue, 16);
+          index += temp.length;
+          data.push(temp);
+          temp = {};
+          state = 'offset';
+        }
+      }
+
+      const bgrToHex = bgr => {
+        const bgrStr = bgr.toString(16).padStart(4, '0');
+        let bgrInt = parseInt(bgrStr.slice(2, 4) + bgrStr.slice(0, 2), 16);
+        bgrInt = Math.min(bgrInt, Math.pow(2, 15) - 1); // limit to 15-bit
+
+        const r = (bgrInt & 0b11111) * 8;
+        const g = ((bgrInt >>> 5) & 0b11111) * 8;
+        const b = ((bgrInt >>> 10) & 0b11111) * 8;
+        const rError = Math.floor(r / 32);
+        const gError = Math.floor(g / 32);
+        const bError = Math.floor(b / 32);
+
+        return '#' + (
+          (r + rError).toString(16).padStart(2, '0') +
+          (g + gError).toString(16).padStart(2, '0') +
+          (b + bError).toString(16).padStart(2, '0')
+        ).toUpperCase();
+      }
+
+      const valToState = {};
+      const valueFunctionFor = (id, addr) => {
+        return (val) => {
+          let pal = null;
+          const override = data.find(d => d.offset === addr);
+          if (override) { // overriden by extra
+            if (override.value === 0x7E) {
+              pal = this.extras.find(e => e.id === 7);
+            } else { // pal.value === 0
+              pal = this.extras.find(e => e.id === 6);
+            }
+            pal.overrideId = id;
+          } else {
+            pal = this.palettes.find(p => p.id === id);
+          }
+          pal.value = val;
+          pal.hex = bgrToHex(val);
+        };
+      };
+
+      valToState['6A64'] = valueFunctionFor(1, '6A60');
+      valToState['6A50'] = valueFunctionFor(2, '6A54');
+      valToState['6A5C'] = valueFunctionFor(3, '6A58');
+      valToState['6A80'] = valueFunctionFor(4, '6A7C');
+      valToState['6A70'] = valueFunctionFor(5, '6A74'); // use 74 to avoid free slot
+      valToState['6A6C'] = val => {
+        const override = data.some(d => ['6A74', '6A78'].includes(d.offset));
+        if (!override) { // if 5 is overriden free slot can't be set
+          this.freeSlot = val === 0x7E ? '7' : '6';
+        }
+      };
+
+      this.reset(false);
+      data.forEach(d => {
+        const f = valToState[d.offset];
+        if (f) { f(d.value); }
+      });
+      this.buildPatch();
     },
   }
 });
