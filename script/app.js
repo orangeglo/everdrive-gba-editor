@@ -2,12 +2,14 @@
   EverDrive GBA Theme Editor
 */
 
+const AO = -0x48 // address offset for version 16 in relation to version 15
+
 const DEFAULT_PALETTES = [
-  { id: 1, label: 'Basic Text, Selected Entry', value: 0xFF7F, hex: '#FFFFFF', valAddr: 0x6A64, palAddrs: [0x6A60] },
-  { id: 2, label: 'Unselected ROM', value: 0xF75E, hex: '#BDBDBD', valAddr: 0x6A50, palAddrs: [0x6A54] },
-  { id: 3, label: 'Unselected Folder, Menu Item', value: 0xBD27, hex: '#EFEF4A', valAddr: 0x6A5C, palAddrs: [0x6A58] },
-  { id: 4, label: 'Menu Header BG', value: 0x947E, hex: '#A5A5FF', valAddr: 0x6A80, palAddrs: [0x6A7C] },
-  { id: 5, label: 'ROM List Header/Footer BG, Menu BG', value: 0x3146, hex: '#8C8C8C', valAddr: 0x6A70, palAddrs: [0x6A6C, 0x6A74, 0x6A78] },
+  { id: 1, label: 'Basic Text, Selected Entry', value: 0xFF7F, hex: '#FFFFFF', valAddr: 0x6A64+AO, palAddrs: [0x6A60+AO] },
+  { id: 2, label: 'Unselected ROM', value: 0xF75E, hex: '#BDBDBD', valAddr: 0x6A50+AO, palAddrs: [0x6A54+AO] },
+  { id: 3, label: 'Unselected Folder, Menu Item', value: 0xBD27, hex: '#EFEF4A', valAddr: 0x6A5C+AO, palAddrs: [0x6A58+AO] },
+  { id: 4, label: 'Menu Header BG', value: 0x947E, hex: '#A5A5FF', valAddr: 0x6A80+AO, palAddrs: [0x6A7C+AO] },
+  { id: 5, label: 'ROM List Header/Footer BG, Menu BG', value: 0x3146, hex: '#8C8C8C', valAddr: 0x6A70+AO, palAddrs: [0x6A6C+AO, 0x6A74+AO, 0x6A78+AO] },
 ];
 const DEFAULT_EXTRAS = [
   { id: 6, label: 'Background', value: 0x0000, hex: '#000000', overrideId: null, pal: 0 },
@@ -297,10 +299,10 @@ const app = new Vue({
         }
       });
 
-      // // Change "page" to "Page"
+      // Change "page" to "Page"
       // chunks.push(0);
       // chunks.push(0xE6);
-      // chunks.push(0xA0);
+      // chunks.push(0x50);
       // chunks.push(0);
       // chunks.push(1);
       // chunks.push(0x50);
@@ -439,13 +441,20 @@ const app = new Vue({
         };
       };
 
-      valToState['6A64'] = valueFunctionFor(1, '6A60');
-      valToState['6A50'] = valueFunctionFor(2, '6A54');
-      valToState['6A5C'] = valueFunctionFor(3, '6A58');
-      valToState['6A80'] = valueFunctionFor(4, '6A7C');
-      valToState['6A70'] = valueFunctionFor(5, '6A74'); // use 74 to avoid free slot
-      valToState['6A6C'] = val => {
-        const override = data.some(d => ['6A74', '6A78'].includes(d.offset));
+      const valAddrString = (id) => {
+        return DEFAULT_PALETTES.find(p => p.id == id).valAddr.toString(16).toUpperCase();
+      };
+      const palAddrString = (id, index) => {
+        return DEFAULT_PALETTES.find(p => p.id == id).palAddrs[index].toString(16).toUpperCase();
+      };
+
+      valToState[valAddrString(1)] = valueFunctionFor(1, palAddrString(1, 0));
+      valToState[valAddrString(2)] = valueFunctionFor(2, palAddrString(2, 0));
+      valToState[valAddrString(3)] = valueFunctionFor(3, palAddrString(3, 0));
+      valToState[valAddrString(4)] = valueFunctionFor(4, palAddrString(4, 0));
+      valToState[valAddrString(5)] = valueFunctionFor(5, palAddrString(5, 1)); // use 74 to avoid free slot
+      valToState[palAddrString(5, 0)] = val => {
+        const override = data.some(d => [palAddrString(5, 1), palAddrString(5, 2)].includes(d.offset));
         if (!override) { // if 5 is overriden free slot can't be set
           this.freeSlot = val === 0x7E ? '7' : '6';
         }

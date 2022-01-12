@@ -69,7 +69,7 @@
             <button @click="reset">Reset to Default</button>
             <div>
               <button v-on:click="triggerIpsFileLabel" type="button">
-                <label for="ipsFileInput" ref="ipsFileLabel" v-on:click="e => e.stopPropagation()">Import an IPS Patch</label>
+                <label for="ipsFileInput" ref="ipsFileLabel" v-on:click="e => e.stopPropagation()">Import an IPS Patch (v16)</label>
               </button>
               <input style="display: none" id="ipsFileInput" type="file" v-on:change="uploadIPS" accept=".ips">
             </div>
@@ -80,13 +80,13 @@
             :href='patchData'
             class='download-link'
             type="application/octet-stream"
-            download="everdrive_gba_v15_theme_patch.ips"
+            download="everdrive_gba_v16_theme_patch.ips"
             :class="{ disabled: !downloadEnabled }"
           >
             >>> Download IPS Patch <<<
           </a>
           <p class='short-text'>
-            Apply the patch to the <span class='bold'>GBASYS/GBAOS.gba</span> file on your EverDrive. This patch will only work with the latest firmware version, <span class='bold'>v1.15!</span>
+            Apply the patch to the <span class='bold'>GBASYS/GBAOS.gba</span> file on your EverDrive. This patch will only work with the latest firmware version, <span class='bold'>v1.16!</span>
           </p>
           <p class='short-text'>
             You can download the latest firmware from <a href="http://krikzz.com/pub/support/everdrive-gba/OS/">Krikzz's website</a>. I recommend using <a href="https://www.romhacking.net/patch/">ROMhacking.net's online patching tool</a> if you don't have a preferred patching method.
