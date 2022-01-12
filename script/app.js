@@ -300,12 +300,12 @@ const app = new Vue({
       });
 
       // Change "page" to "Page"
-      chunks.push(0);
-      chunks.push(0xE6);
-      chunks.push(0x50);
-      chunks.push(0);
-      chunks.push(1);
-      chunks.push(0x50);
+      // chunks.push(0);
+      // chunks.push(0xE6);
+      // chunks.push(0x50);
+      // chunks.push(0);
+      // chunks.push(1);
+      // chunks.push(0x50);
 
       const bytes = new Uint8Array([IPS_HEADER, chunks.flat(), IPS_EOF].flat());
       if (this.patchData) { URL.revokeObjectURL(this.patchData) }
