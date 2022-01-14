@@ -2,8 +2,6 @@
   EverDrive GBA Theme Editor
 */
 
-const AO = -0x48 // address offset for version 16 in relation to version 15
-
 const CV = "v16";
 const OFFSETS = {
   v15: [
@@ -14,11 +12,11 @@ const OFFSETS = {
     { id: 5, valAddr: 0x6A70, palAddrs: [0x6A6C, 0x6A74, 0x6A78] }
   ],
   v16: [
-    { id: 1, valAddr: 0x6A64+A0, palAddrs: [0x6A60+A0] },
-    { id: 2, valAddr: 0x6A50+A0, palAddrs: [0x6A54+A0] },
-    { id: 3, valAddr: 0x6A5C+A0, palAddrs: [0x6A58+A0] },
-    { id: 4, valAddr: 0x6A80+A0, palAddrs: [0x6A7C+A0] },
-    { id: 5, valAddr: 0x6A70+A0, palAddrs: [0x6A6C+A0, 0x6A74+A0, 0x6A78+A0] }
+    { id: 1, valAddr: 0x6A1C, palAddrs: [0x6A18] },
+    { id: 2, valAddr: 0x6A08, palAddrs: [0x6A0C] },
+    { id: 3, valAddr: 0x6A14, palAddrs: [0x6A10] },
+    { id: 4, valAddr: 0x6A38, palAddrs: [0x6A34] },
+    { id: 5, valAddr: 0x6A28, palAddrs: [0x6A24, 0x6A2C, 0x6A30] }
   ]
 };
 
