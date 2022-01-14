@@ -4,12 +4,34 @@
 
 const AO = -0x48 // address offset for version 16 in relation to version 15
 
+const CV = "v16";
+const OFFSETS = {
+  v15: [
+    { id: 1, valAddr: 0x6A64, palAddrs: [0x6A60] },
+    { id: 2, valAddr: 0x6A50, palAddrs: [0x6A54] },
+    { id: 3, valAddr: 0x6A5C, palAddrs: [0x6A58] },
+    { id: 4, valAddr: 0x6A80, palAddrs: [0x6A7C] },
+    { id: 5, valAddr: 0x6A70, palAddrs: [0x6A6C, 0x6A74, 0x6A78] }
+  ],
+  v16: [
+    { id: 1, valAddr: 0x6A64+A0, palAddrs: [0x6A60+A0] },
+    { id: 2, valAddr: 0x6A50+A0, palAddrs: [0x6A54+A0] },
+    { id: 3, valAddr: 0x6A5C+A0, palAddrs: [0x6A58+A0] },
+    { id: 4, valAddr: 0x6A80+A0, palAddrs: [0x6A7C+A0] },
+    { id: 5, valAddr: 0x6A70+A0, palAddrs: [0x6A6C+A0, 0x6A74+A0, 0x6A78+A0] }
+  ]
+};
+
+const offsetByVersionId = (version, id) => {
+  return OFFSETS[version].find(obj => obj.id == id);
+};
+
 const DEFAULT_PALETTES = [
-  { id: 1, label: 'Basic Text, Selected Entry', value: 0xFF7F, hex: '#FFFFFF', valAddr: 0x6A64+AO, palAddrs: [0x6A60+AO] },
-  { id: 2, label: 'Unselected ROM', value: 0xF75E, hex: '#BDBDBD', valAddr: 0x6A50+AO, palAddrs: [0x6A54+AO] },
-  { id: 3, label: 'Unselected Folder, Menu Item', value: 0xBD27, hex: '#EFEF4A', valAddr: 0x6A5C+AO, palAddrs: [0x6A58+AO] },
-  { id: 4, label: 'Menu Header BG', value: 0x947E, hex: '#A5A5FF', valAddr: 0x6A80+AO, palAddrs: [0x6A7C+AO] },
-  { id: 5, label: 'ROM List Header/Footer BG, Menu BG', value: 0x3146, hex: '#8C8C8C', valAddr: 0x6A70+AO, palAddrs: [0x6A6C+AO, 0x6A74+AO, 0x6A78+AO] },
+  { id: 1, label: 'Basic Text, Selected Entry', value: 0xFF7F, hex: '#FFFFFF', valAddr: offsetByVersionId(CV, 1).valAddr, palAddrs: offsetByVersionId(CV, 1).palAddrs },
+  { id: 2, label: 'Unselected ROM', value: 0xF75E, hex: '#BDBDBD', valAddr: offsetByVersionId(CV, 2).valAddr, palAddrs: offsetByVersionId(CV, 2).palAddrs },
+  { id: 3, label: 'Unselected Folder, Menu Item', value: 0xBD27, hex: '#EFEF4A', valAddr: offsetByVersionId(CV, 3).valAddr, palAddrs: offsetByVersionId(CV, 3).palAddrs },
+  { id: 4, label: 'Menu Header BG', value: 0x947E, hex: '#A5A5FF', valAddr: offsetByVersionId(CV, 4).valAddr, palAddrs: offsetByVersionId(CV, 4).palAddrs },
+  { id: 5, label: 'ROM List Header/Footer BG, Menu BG', value: 0x3146, hex: '#8C8C8C', valAddr: offsetByVersionId(CV, 5).valAddr, palAddrs: offsetByVersionId(CV, 5).palAddrs },
 ];
 const DEFAULT_EXTRAS = [
   { id: 6, label: 'Background', value: 0x0000, hex: '#000000', overrideId: null, pal: 0 },
@@ -441,24 +463,28 @@ const app = new Vue({
         };
       };
 
-      const valAddrString = (id) => {
-        return DEFAULT_PALETTES.find(p => p.id == id).valAddr.toString(16).toUpperCase();
-      };
-      const palAddrString = (id, index) => {
-        return DEFAULT_PALETTES.find(p => p.id == id).palAddrs[index].toString(16).toUpperCase();
-      };
 
-      valToState[valAddrString(1)] = valueFunctionFor(1, palAddrString(1, 0));
-      valToState[valAddrString(2)] = valueFunctionFor(2, palAddrString(2, 0));
-      valToState[valAddrString(3)] = valueFunctionFor(3, palAddrString(3, 0));
-      valToState[valAddrString(4)] = valueFunctionFor(4, palAddrString(4, 0));
-      valToState[valAddrString(5)] = valueFunctionFor(5, palAddrString(5, 1)); // use 74 to avoid free slot
-      valToState[palAddrString(5, 0)] = val => {
-        const override = data.some(d => [palAddrString(5, 1), palAddrString(5, 2)].includes(d.offset));
-        if (!override) { // if 5 is overriden free slot can't be set
-          this.freeSlot = val === 0x7E ? '7' : '6';
-        }
-      };
+      // set up offset to setter function map, starting with older versions first (so newer take priority)
+      Object.keys(OFFSETS).sort().forEach(version => {
+        const valAddrString = (id) => {
+          return OFFSETS[version].find(p => p.id == id).valAddr.toString(16).toUpperCase();
+        };
+        const palAddrString = (id, index) => {
+          return OFFSETS[version].find(p => p.id == id).palAddrs[index].toString(16).toUpperCase();
+        };
+
+        valToState[valAddrString(1)] = valueFunctionFor(1, palAddrString(1, 0));
+        valToState[valAddrString(2)] = valueFunctionFor(2, palAddrString(2, 0));
+        valToState[valAddrString(3)] = valueFunctionFor(3, palAddrString(3, 0));
+        valToState[valAddrString(4)] = valueFunctionFor(4, palAddrString(4, 0));
+        valToState[valAddrString(5)] = valueFunctionFor(5, palAddrString(5, 1)); // use 74 (v15) to avoid free slot
+        valToState[palAddrString(5, 0)] = val => {
+          const override = data.some(d => [palAddrString(5, 1), palAddrString(5, 2)].includes(d.offset));
+          if (!override) { // if 5 is overriden free slot can't be set
+            this.freeSlot = val === 0x7E ? '7' : '6';
+          }
+        };
+      });
 
       this.reset(false);
       data.forEach(d => {

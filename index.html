@@ -69,7 +69,7 @@
             <button @click="reset">Reset to Default</button>
             <div>
               <button v-on:click="triggerIpsFileLabel" type="button">
-                <label for="ipsFileInput" ref="ipsFileLabel" v-on:click="e => e.stopPropagation()">Import an IPS Patch (v16)</label>
+                <label for="ipsFileInput" ref="ipsFileLabel" v-on:click="e => e.stopPropagation()">Import an IPS Patch</label>
               </button>
               <input style="display: none" id="ipsFileInput" type="file" v-on:change="uploadIPS" accept=".ips">
             </div>
