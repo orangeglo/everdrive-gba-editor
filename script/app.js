@@ -402,7 +402,7 @@ const app = new Vue({
       while (index < buffer.length) {
         if (state === 'offset') {
           const o = buffer.slice(index, index + 3);
-          const offsetStr = parseInt(`${o[0].toString(16)}${o[1].toString(16)}${o[2].toString(16)}`, 16);
+          const offsetStr = parseInt(o.map(n => n.toString(16).padStart(2, '0')).join(''), 16);
           temp.offset = offsetStr.toString(16).toUpperCase();
           index += 4;
           state = 'length';
