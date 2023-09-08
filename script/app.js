@@ -393,6 +393,11 @@ const app = new Vue({
       e.target.value = '';
     },
     parseIPS: async function(ipsArrayBuffer) {
+      const byteArrayToHexString = (arr) => {
+        // make a new array so that we support typed arrays as input, which normally can't map to strings
+        return Array.from(arr).map(h => h.toString(16).padStart(2, '0')).join('').toUpperCase();
+      }
+
       const buffer = new Uint8Array(ipsArrayBuffer).slice(5, ipsArrayBuffer.byteLength - 3);
       const data = [];
 
@@ -401,9 +406,8 @@ const app = new Vue({
       let temp = {};
       while (index < buffer.length) {
         if (state === 'offset') {
-          const o = buffer.slice(index, index + 3);
-          const offsetStr = parseInt(`${o[0].toString(16)}${o[1].toString(16)}${o[2].toString(16)}`, 16);
-          temp.offset = offsetStr.toString(16).toUpperCase();
+          const o = buffer.slice(index + 1, index + 3); // first byte is always zero so can start at index + 1
+          temp.offset = byteArrayToHexString(o);
           index += 4;
           state = 'length';
         } else if (state === 'length') {
@@ -434,11 +438,7 @@ const app = new Vue({
         const gError = Math.floor(g / 32);
         const bError = Math.floor(b / 32);
 
-        return '#' + (
-          (r + rError).toString(16).padStart(2, '0') +
-          (g + gError).toString(16).padStart(2, '0') +
-          (b + bError).toString(16).padStart(2, '0')
-        ).toUpperCase();
+        return `#${byteArrayToHexString([r + rError, g + gError, b + bError])}`;
       }
 
       const valToState = {};
