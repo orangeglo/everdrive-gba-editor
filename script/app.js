@@ -2,7 +2,7 @@
   EverDrive GBA Theme Editor
 */
 
-const CV = "v16";
+const CV = "v17";
 const OFFSETS = {
   v15: [
     { id: 1, valAddr: 0x6A64, palAddrs: [0x6A60] },
@@ -17,6 +17,13 @@ const OFFSETS = {
     { id: 3, valAddr: 0x6A14, palAddrs: [0x6A10] },
     { id: 4, valAddr: 0x6A38, palAddrs: [0x6A34] },
     { id: 5, valAddr: 0x6A28, palAddrs: [0x6A24, 0x6A2C, 0x6A30] }
+  ],
+  v17: [
+    { id: 1, valAddr: 0x77B0, palAddrs: [0x77AC] },
+    { id: 2, valAddr: 0x779C, palAddrs: [0x77A0] },
+    { id: 3, valAddr: 0x77A8, palAddrs: [0x77A4] },
+    { id: 4, valAddr: 0x77CC, palAddrs: [0x77C8] },
+    { id: 5, valAddr: 0x77BC, palAddrs: [0x77B8, 0x77C0, 0x77C4] }
   ]
 };
 
